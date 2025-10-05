@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户护航系统 - 优雅星空版</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
+    <style>
+        :root {
+            --primary: #5d8bf4;
+            --primary-glow: #6e9cff;
+            --success: #00d97e;
+            --warning: #f6c343;
+            --danger: #e63757;
+            --space-bg: #0a0e29;
+            --space-light: #1a1f4b;
+            --card-bg: rgba(16, 22, 58, 0.85);
+            --text-primary: #e0e7ff;
+            --text-secondary: #a0a7c4;
+            --border-color: rgba(93, 139, 244, 0.3);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--space-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* 优雅的星空背景 */
+        .galaxy-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(93, 139, 244, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(109, 88, 244, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at center, #1a1f4b 0%, #0a0e29 70%);
+        }
+        
+        .stars-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            animation: twinkle 4s infinite ease-in-out;
+        }
+        
+        .star.small {
+            width: 1px;
+            height: 1px;
+            box-shadow: 0 0 2px 1px rgba(255, 255, 255, 0.7);
+        }
+        
+        .star.medium {
+            width: 2px;
+            height: 2px;
+            box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.8);
+        }
+        
+        .star.large {
+            width: 3px;
+            height: 3px;
+            box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.9);
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        .shooting-star {
+            position: absolute;
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+            animation: shooting-star 4s linear infinite;
+            opacity: 0;
+        }
+        
+        @keyframes shooting-star {
+            0% { 
+                transform: translateX(-100px) translateY(0) rotate(45deg); 
+                opacity: 0; 
+            }
+            10% { opacity: 1; }
+            100% { 
+                transform: translateX(calc(100vw + 100px)) translateY(calc(100vh/2)) rotate(45deg); 
+                opacity: 0; 
+            }
+        }
+        
+        .constellation {
+            position: absolute;
+            width: 200px;
+            height: 150px;
+            opacity: 0.1;
+        }
+        
+        .constellation-line {
+            position: absolute;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+            transform-origin: 0 0;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, rgba(16, 22, 58, 0.9), rgba(30, 40, 100, 0.8));
+            color: white;
+            padding: 20px 40px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 6px 25px rgba(0, 10, 60, 0.5);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-glow), transparent);
+        }
+        
+        .header::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(110, 156, 255, 0.1) 0%, rgba(110, 156, 255, 0) 70%);
+        }
+        
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            background: linear-gradient(90deg, #fff, var(--primary-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .header-badge {
+            position: absolute;
+            right: 25px;
+            top: 25px;
+            background: rgba(93, 139, 244, 0.2);
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 14px;
+            z-index: 1;
+            border: 1px solid rgba(93, 139, 244, 0.3);
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 10, 60, 0.4);
+            border-color: rgba(93, 139, 244, 0.5);
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+            min-width: 120px;
+            color: var(--text-secondary);
+        }
+        
+        .tab.active {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: rgba(93, 139, 244, 0.05);
+            color: var(--text-primary);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: rgba(30, 40, 100, 0.3);
+            font-size: 16px;
+            transition: all 0.3s;
+            color: var(--text-primary);
+        }
+        
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93, 139, 244, 0.2);
+            outline: none;
+            background: rgba(30, 40, 100, 0.5);
+        }
+        
+        .form-input.error {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 3px rgba(230,55,87,0.2);
+        }
+        
+        .error-message {
+            color: var(--danger);
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .btn {
+            padding: 16px 35px;
+            border-radius: 15px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.25s;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), #3a5fc8);
+            color: white;
+            box-shadow: 0 4px 15px rgba(93, 139, 244, 0.4);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(93, 139, 244, 0.6);
+        }
+        
+        .btn-secondary {
+            background: rgba(30, 40, 100, 0.5);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(40, 50, 120, 0.5);
+        }
+        
+        .auth-card {
+            background: linear-gradient(135deg, rgba(30, 40, 100, 0.3) 0%, rgba(16, 22, 58, 0.5) 100%);
+            border: 1px dashed var(--border-color);
+            border-radius: 18px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .key-display {
+            background: rgba(10, 15, 40, 0.8);
+            color: #6cbbf7;
+            padding: 18px;
+            border-radius: 12px;
+            font-family: monospace;
+            word-break: break-all;
+            font-size: 14px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+            position: relative;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(93, 139, 244, 0.2);
+        }
+        
+        .key-display:hover {
+            background: rgba(15, 20, 50, 0.9);
+        }
+        
+        .key-display.masked::after {
+            content: "👁️ 点击显示";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #8ca3c2;
+        }
+        
+        .merchant-status {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(93, 139, 244, 0.2);
+            border-radius: 50px;
+            margin-left: 15px;
+            font-size: 14px;
+            border: 1px solid rgba(93, 139, 244, 0.3);
+        }
+        
+        .access-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 20px;
+            background: rgba(93, 139, 244, 0.1);
+            border-radius: 50px;
+            margin: 10px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            background: rgba(0, 217, 126, 0.2);
+            color: #00d97e;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            display: none;
+            border: 1px solid rgba(0, 217, 126, 0.3);
+        }
+        
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .channel-item {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(30, 40, 100, 0.3);
+        }
+        
+        .channel-item:hover {
+            border-color: var(--primary);
+            background: rgba(93, 139, 244, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .channel-item.selected {
+            border-color: var(--primary);
+            background: rgba(93, 139, 244, 0.2);
+            box-shadow: 0 5px 15px rgba(93, 139, 244, 0.3);
+        }
+        
+        .channel-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 15px 20px;
+                text-align: center;
+            }
+            
+            .header-badge {
+                position: static;
+                display: inline-block;
+                margin-top: 10px;
+            }
+            
+            .card {
+                padding: 20px 15px;
+            }
+            
+            .tab {
+                padding: 12px 15px;
+                font-size: 14px;
+                flex: 1 0 50%;
+            }
+            
+            .form-input {
+                padding: 12px 15px;
+            }
+            
+            .btn {
+                padding: 14px 20px;
+            }
+            
+            .channel-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tab {
+                flex: 1 0 100%;
+            }
+            
+            .access-badge {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px;
+            }
+            
+            .access-badge button {
+                margin-top: 5px;
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 优雅的星空背景 -->
+    <div class="galaxy-bg" id="galaxyBg">
+        <!-- 星星将通过JS动态生成 -->
+    </div>
+
+    <div class="header">
+        <h1>商户护航系统</h1>
+        <p>商户自助授权 · 通道自动绑定 · 密钥智能管理</p>
+        <div class="header-badge">商户ID: MCN-8812</div>
+    </div>
+
+    <!-- 商户授权面板 -->
+    <div class="card">
+        <div class="tab-container">
+            <div class="tab active" onclick="switchTab('bind')">商户绑定</div>
+            <div class="tab" onclick="switchTab('manage')">通道管理</div>
+            <div class="tab" onclick="switchTab('settle')">结算设置</div>
+        </div>
+
+        <!-- 商户绑定选项卡 -->
+        <div id="bindTab">
+            <h2>商户自助绑定窗口 <span class="merchant-status">未验证</span></h2>
+            
+            <div class="success-message" id="successMessage"></div>
+            
+            <div class="form-group">
+                <label class="form-label">商户名称</label>
+                <input type="text" class="form-input" id="merchantName" placeholder="输入营业执照上的商户全称">
+                <div class="error-message" id="nameError">商户名称至少需要2个字符</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">联系人手机号</label>
+                <input type="tel" class="form-input" id="merchantPhone" placeholder="用于接收验证码和账户通知">
+                <div class="error-message" id="phoneError">请输入有效的手机号码</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">授权通道选择</label>
+                <div class="channel-grid">
+                    <div class="channel-item" data-value="alipay">
+                        <div class="channel-icon">💰</div>
+                        <div>支付宝当面付</div>
+                    </div>
+                    <div class="channel-item" data-value="wechat">
+                        <div class="channel-icon">💳</div>
+                        <div>微信支付商业版</div>
+                    </div>
+                    <div class="channel-item" data-value="bank">
+                        <div class="channel-icon">🏦</div>
+                        <div>银联企业网关</div>
+                    </div>
+                    <div class="channel-item" data-value="union">
+                        <div class="channel-icon">⚡</div>
+                        <div>云闪付商家服务</div>
+                    </div>
+                </div>
+                <div class="error-message" id="channelError">请选择至少一个支付通道</div>
+            </div>
+            
+            <button class="btn btn-primary" id="authButton" onclick="requestAuth()">
+                <span id="buttonText">获取授权密钥</span>
+            </button>
+        </div>
+
+        <!-- 通道管理选项卡 (默认隐藏) -->
+        <div id="manageTab" style="display:none">
+            <h2>通道授权管理</h2>
+            <div class="auth-card">
+                <h3>已授权通道</h3>
+                <div id="boundChannels">
+                    <!-- 动态加载授权通道 -->
+                </div>
+                <button class="btn btn-secondary" onclick="addChannel()">
+                    + 添加新支付通道
+                </button>
+            </div>
+            
+            <div class="auth-card">
+                <h3>API接入密钥 
+                    <button style="float:right; background:none; border:none; color:var(--primary); cursor:pointer; font-size:14px;" 
+                         onclick="refreshApiKey()">刷新密钥</button>
+                </h3>
+                <div class="key-display masked" id="apiKeyDisplay" onclick="toggleApiKeyVisibility()">
+                    ••••••••••••••••••••••••••••••••
+                </div>
+                <p style="font-size:14px; color:var(--text-secondary)">※ 此密钥用于调用支付API，请妥善保管</p>
+            </div>
+        </div>
+
+        <!-- 结算设置选项卡 (默认隐藏) -->
+        <div id="settleTab" style="display:none">
+            <h2>结算设置</h2>
+            <div class="auth-card">
+                <h3>结算账户管理</h3>
+                <p style="color:var(--text-secondary)">商户绑定完成后，可在此配置结算账户信息</p>
+                <button class="btn btn-secondary" style="max-width:300px; margin-top:20px;" disabled>
+                    前往结算设置 (需先完成商户绑定)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 智能收银台面板 -->
+    <div class="card">
+        <h2>智能收银台</h2>
+        <div id="qrcodeCanvas" style="text-align:center; margin:20px 0;"></div>
+        
+        <div style="text-align:center">
+            <div class="access-badge">
+                <span>🔑</span> 商户权限: <span id="merchantLevel">未绑定通道</span>
+            </div>
+            <button class="btn btn-primary" onclick="activatePayment()" 
+                    style="max-width:400px; margin:30px auto;" id="activateButton">
+                启用智能收款
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============== 商户授权核心系统 ==============
+        const MERCHANT_DATA = {
+            name: "",
+            phone: "",
+            channels: [],
+            apiKey: CryptoJS.SHA256("init_key" + Date.now()).toString(),
+            verified: false
+        };
+        
+        // 创建优雅的星空背景
+        function createElegantStarfield() {
+            const galaxyBg = document.getElementById('galaxyBg');
+            
+            // 创建星星容器
+            const starsContainer = document.createElement('div');
+            starsContainer.classList.add('stars-container');
+            
+            // 创建80颗星星 - 数量减少，更清晰
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                
+                // 随机选择星星大小
+                const sizes = ['small', 'medium', 'large'];
+                const size = sizes[Math.floor(Math.random() * sizes.length)];
+                star.classList.add('star', size);
+                
+                // 随机位置 - 确保星星分布均匀
+                const left = Math.random() * 95 + 2.5; // 避免太靠近边缘
+                const top = Math.random() * 95 + 2.5;
+                
+                // 随机闪烁延迟
+                const delay = Math.random() * 5;
+                
+                star.style.left = `${left}%`;
+                star.style.top = `${top}%`;
+                star.style.animationDelay = `${delay}s`;
+                
+                starsContainer.appendChild(star);
+            }
+            
+            // 添加一个流星
+            const shootingStar = document.createElement('div');
+            shootingStar.classList.add('shooting-star');
+            shootingStar.style.top = `${Math.random() * 30}%`;
+            shootingStar.style.animationDelay = `${Math.random() * 10}s`;
+            
+            galaxyBg.appendChild(starsContainer);
+            galaxyBg.appendChild(shootingStar);
+        }
+        
+        // 切换选项卡
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('bindTab').style.display = 'none';
+            document.getElementById('manageTab').style.display = 'none';
+            document.getElementById('settleTab').style.display = 'none';
+            
+            if(tabName === 'bind') {
+                document.querySelector('.tab:nth-child(1)').classList.add('active');
+                document.getElementById('bindTab').style.display = 'block';
+            } else if(tabName === 'manage') {
+                document.querySelector('.tab:nth-child(2)').classList.add('active');
+                document.getElementById('manageTab').style.display = 'block';
+                renderBoundChannels();
+            } else if(tabName === 'settle') {
+                document.querySelector('.tab:nth-child(3)').classList.add('active');
+                document.getElementById('settleTab').style.display = 'block';
+            }
+        }
+        
+        // 表单验证函数
+        function validateForm() {
+            let isValid = true;
+            
+            // 商户名称验证
+            const name = document.getElementById('merchantName').value.trim();
+            if (name.length < 2) {
+                document.getElementById('nameError').style.display = 'block';
+                document.getElementById('merchantName').classList.add('error');
+                isValid = false;
+            } else {
+                document.getElementById('nameError').style.display = 'none';
+                document.getElementById('merchantName').classList.remove('error');
+            }
+            
+            // 手机号验证
+            const phone = document.getElementById('merchantPhone').value.trim();
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            if (!phoneRegex.test(phone)) {
+                document.getElementById('phoneError').style.display = 'block';
+                document.getElementById('merchantPhone').classList.add('error');
+                isValid = false;
+            } else {
+                document.getElementById('phoneError').style.display = 'none';
+                document.getElementById('merchantPhone').classList.remove('error');
+            }
+            
+            // 通道选择验证
+            const selectedChannels = document.querySelectorAll('.channel-item.selected');
+            if (selectedChannels.length === 0) {
+                document.getElementById('channelError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('channelError').style.display = 'none';
+            }
+            
+            return isValid;
+        }
+        
+        // 生成授权密钥
+        function requestAuth() {
+            if (!validateForm()) return;
+            
+            const submitBtn = document.getElementById('authButton');
+            const buttonText = document.getElementById('buttonText');
+            const originalText = buttonText.textContent;
+            
+            // 防止重复提交
+            submitBtn.disabled = true;
+            buttonText.innerHTML = '<span class="loading"></span>授权中...';
+            
+            // 模拟API调用延迟
+            setTimeout(() => {
+                const name = document.getElementById('merchantName').value.trim();
+                const phone = document.getElementById('merchantPhone').value.trim();
+                const selectedChannels = document.querySelectorAll('.channel-item.selected');
+                
+                // 保存商户数据
+                MERCHANT_DATA.name = name;
+                MERCHANT_DATA.phone = phone;
+                MERCHANT_DATA.channels = Array.from(selectedChannels).map(item => item.getAttribute('data-value'));
+                MERCHANT_DATA.verified = true;
+                
+                // 生成密钥
+                const timestamp = Date.now();
+                MERCHANT_DATA.apiKey = CryptoJS.SHA256(`${name}${phone}${timestamp}`).toString().substr(0, 96);
+                
+                // 更新UI
+                document.querySelector('.merchant-status').textContent = "已认证";
+                document.querySelector('.merchant-status').style.background = "rgba(0, 217, 126, 0.2)";
+                document.querySelector('.merchant-status').style.color = "#00d97e";
+                document.querySelector('.merchant-status').style.borderColor = "rgba(0, 217, 126, 0.3)";
+                document.getElementById('merchantLevel').textContent = 
+                    MERCHANT_DATA.channels.length > 1 ? "高级商户权限" : "基础商户权限";
+                
+                // 显示密钥
+                document.getElementById('apiKeyDisplay').textContent = MERCHANT_DATA.apiKey;
+                document.getElementById('apiKeyDisplay').classList.remove('masked');
+                
+                // 显示成功消息
+                const successMessage = document.getElementById('successMessage');
+                successMessage.textContent = `✅ 商户绑定成功! 已授权 ${MERCHANT_DATA.channels.length} 个支付通道`;
+                successMessage.style.display = 'block';
+                
+                // 保存到本地存储
+                saveMerchantData();
+                
+                // 切换到管理选项卡
+                setTimeout(() => {
+                    switchTab('manage');
+                    
+                    // 恢复按钮状态
+                    submitBtn.disabled = false;
+                    buttonText.textContent = originalText;
+                }, 1000);
+                
+            }, 1500);
+        }
+        
+        // 渲染已绑定通道
+        function renderBoundChannels() {
+            if(!MERCHANT_DATA.channels.length) {
+                document.getElementById('boundChannels').innerHTML = 
+                    `<p style="color:var(--text-secondary)">尚未绑定任何支付通道</p>`;
+                return;
+            }
+            
+            let html = '';
+            const channelNames = {
+                alipay: "支付宝",
+                wechat: "微信支付",
+                bank: "银联网关",
+                union: "云闪付"
+            };
+            
+            const channelIcons = {
+                alipay: "💰",
+                wechat: "💳",
+                bank: "🏦",
+                union: "⚡"
+            };
+            
+            MERCHANT_DATA.channels.forEach(channel => {
+                html += `<div class="access-badge">
+                    <span>${channelIcons[channel]}</span> ${channelNames[channel]} · 已授权
+                    <button style="margin-left:15px; background:none; border:none; color:var(--danger); cursor:pointer; font-size:12px;"
+                            onclick="removeChannel('${channel}')">移除</button>
+                </div>`;
+            });
+            
+            document.getElementById('boundChannels').innerHTML = html;
+        }
+        
+        // 添加支付通道
+        function addChannel() {
+            const availableChannels = ['alipay', 'wechat', 'bank', 'union'];
+            const unboundChannels = availableChannels.filter(ch => !MERCHANT_DATA.channels.includes(ch));
+            
+            if (unboundChannels.length === 0) {
+                alert("所有可用通道都已添加");
+                return;
+            }
+            
+            let message = "请选择要添加的通道:\n";
+            unboundChannels.forEach((ch, index) => {
+                const names = {alipay: "支付宝", wechat: "微信支付", bank: "银联网关", union: "云闪付"};
+                message += `${index + 1}. ${names[ch]}\n`;
+            });
+            
+            const choice = prompt(message + "\n请输入对应数字:");
+            if (!choice) return;
+            
+            const index = parseInt(choice) - 1;
+            if (index >= 0 && index < unboundChannels.length) {
+                const newChannel = unboundChannels[index];
+                MERCHANT_DATA.channels.push(newChannel);
+                saveMerchantData();
+                renderBoundChannels();
+                
+                // 升级商户权限
+                if(MERCHANT_DATA.channels.length > 1) {
+                    document.getElementById('merchantLevel').textContent = "高级商户权限";
+                }
+                
+                alert(`通道 ${newChannel} 添加成功!`);
+            } else {
+                alert("无效的选择");
+            }
+        }
+        
+        // 移除通道
+        function removeChannel(channel) {
+            if (MERCHANT_DATA.channels.length <= 1) {
+                alert("至少需要保留一个支付通道");
+                return;
+            }
+            
+            if (confirm(`确定要移除 ${channel} 通道吗？`)) {
+                MERCHANT_DATA.channels = MERCHANT_DATA.channels.filter(c => c !== channel);
+                saveMerchantData();
+                renderBoundChannels();
+                
+                // 降级商户权限
+                if(MERCHANT_DATA.channels.length === 1) {
+                    document.getElementById('merchantLevel').textContent = "基础商户权限";
+                }
+            }
+        }
+        
+        // 刷新API密钥
+        function refreshApiKey() {
+            if(confirm("确定要刷新API密钥吗？原有密钥将立即失效")) {
+                MERCHANT_DATA.apiKey = CryptoJS.SHA256(`${MERCHANT_DATA.name}${Date.now()}`).toString().substr(0, 96);
+                document.getElementById('apiKeyDisplay').textContent = MERCHANT_DATA.apiKey;
+                document.getElementById('apiKeyDisplay').classList.remove('masked');
+                saveMerchantData();
+                alert("✅ 新API密钥已生成!\n请及时更新您的系统配置");
+            }
+        }
+        
+        // 切换密钥显示/隐藏
+        function toggleApiKeyVisibility() {
+            const keyDisplay = document.getElementById('apiKeyDisplay');
+            if (keyDisplay.classList.contains('masked')) {
+                keyDisplay.textContent = MERCHANT_DATA.apiKey;
+                keyDisplay.classList.remove('masked');
+            } else {
+                keyDisplay.textContent = '•'.repeat(64);
+                keyDisplay.classList.add('masked');
+            }
+        }
+        
+        // ============== 收银台系统 ==============
+        function generateDynamicQR() {
+            if(!MERCHANT_DATA.verified) {
+                alert("请先完成商户绑定和通道授权");
+                return;
+            }
+            
+            const channelPrefix = MERCHANT_DATA.channels[0].toUpperCase().substr(0,2);
+            const randomId = channelPrefix + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+            
+            document.getElementById('qrcodeCanvas').innerHTML = "";
+            new QRCode(document.getElementById("qrcodeCanvas"), {
+                text: "https://pay.secure/merchant/" + randomId,
+                width: 200,
+                height: 200,
+                colorDark : "#5d8bf4",
+                colorLight : "transparent",
+                correctLevel : QRCode.CorrectLevel.Q
+            });
+        }
+        
+        function activatePayment() {
+            if(!MERCHANT_DATA.verified) {
+                alert("请先完成商户绑定");
+                return;
+            }
+            
+            if(!MERCHANT_DATA.channels.length) {
+                alert("尚未授权任何支付通道");
+                return;
+            }
+            
+            const activateBtn = document.getElementById('activateButton');
+            activateBtn.disabled = true;
+            activateBtn.innerHTML = '<span class="loading"></span>激活中...';
+            
+            setTimeout(() => {
+                generateDynamicQR();
+                activateBtn.textContent = '收银台已激活 ✅';
+                
+                setTimeout(() => {
+                    alert("智能收银台已启动!\n绑定通道数: " + MERCHANT_DATA.channels.length);
+                    activateBtn.disabled = false;
+                    activateBtn.textContent = '重新生成收款码';
+                }, 1000);
+            }, 1500);
+        }
+        
+        // ============== 数据持久化 ==============
+        function saveMerchantData() {
+            localStorage.setItem('merchantData', JSON.stringify(MERCHANT_DATA));
+        }
+        
+        function loadMerchantData() {
+            const saved = localStorage.getItem('merchantData');
+            if (saved) {
+                const parsedData = JSON.parse(saved);
+                Object.assign(MERCHANT_DATA, parsedData);
+                updateUIFromData();
+            }
+        }
+        
+        function updateUIFromData() {
+            if (MERCHANT_DATA.verified) {
+                document.getElementById('merchantName').value = MERCHANT_DATA.name;
+                document.getElementById('merchantPhone').value = MERCHANT_DATA.phone;
+                document.querySelector('.merchant-status').textContent = "已认证";
+                document.querySelector('.merchant-status').style.background = "rgba(0, 217, 126, 0.2)";
+                document.querySelector('.merchant-status').style.color = "#00d97e";
+                document.querySelector('.merchant-status').style.borderColor = "rgba(0, 217, 126, 0.3)";
+                document.getElementById('merchantLevel').textContent = 
+                    MERCHANT_DATA.channels.length > 1 ? "高级商户权限" : "基础商户权限";
+                document.getElementById('apiKeyDisplay').textContent = MERCHANT_DATA.apiKey;
+                document.getElementById('apiKeyDisplay').classList.remove('masked');
+                
+                // 选中对应的通道
+                MERCHANT_DATA.channels.forEach(channel => {
+                    const channelItem = document.querySelector(`.channel-item[data-value="${channel}"]`);
+                    if (channelItem) {
+                        channelItem.classList.add('selected');
+                    }
+                });
+            }
+        }
+        
+        // ============== 初始化 ==============
+        function initApp() {
+            // 创建优雅的星空背景
+            createElegantStarfield();
+            
+            // 加载保存的数据
+            loadMerchantData();
+            
+            // 设置通道选择事件
+            document.querySelectorAll('.channel-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    this.classList.toggle('selected');
+                });
+            });
+            
+            // 初始显示API密钥
+            document.getElementById('apiKeyDisplay').textContent = MERCHANT_DATA.apiKey;
+        }
+        
+        // 启动应用
+        window.onload = initApp;
+    </script>
+</body>
+</html>
