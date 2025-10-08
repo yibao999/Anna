@@ -563,25 +563,27 @@
             </div>
             
             <div class="form-group">
-                <label class="form-label">授权通道选择</label>
-                <div class="channel-grid">
-                    <div class="channel-item" data-value="alipay">
-                        <div class="channel-icon">💰</div>
-                        <div>支付宝当面付</div>
-                    </div>
-                    <div class="channel-item" data-value="wechat">
-                        <div class="channel-icon">💳</div>
-                        <div>微信支付商业版</div>
-                    </div>
-                    <div class="channel-item" data-value="bank">
-                        <div class="channel-icon">🏦</div>
-                        <div>银联企业网关</div>
-                    </div>
-                    <div class="channel-item" data-value="union">
-                        <div class="channel-icon">⚡</div>
-                        <div>云闪付商家服务</div>
-                    </div>
-                </div>
+  <label class="form-label">授权通道选择</label>
+  <div class="channel-grid">
+    <div class="channel-item" data-value="alipay" onclick="window.location.href='https://pay.secure/merchant/alipay'">
+      <div class="channel-icon">💰</div>
+      <div>支付宝当面付</div>
+    </div>
+    <div class="channel-item" data-value="wechat" onclick="window.location.href='https://pay.secure/merchant/wechat'">
+      <div class="channel-icon">💳</div>
+      <div>微信支付商业版</div>
+    </div>
+    <div class="channel-item" data-value="bank" onclick="window.location.href='https://pay.secure/merchant/bank'">
+      <div class="channel-icon">🏦</div>
+      <div>银联企业网关</div>
+    </div>
+    <div class="channel-item" data-value="union" onclick="window.location.href='https://pay.secure/merchant/union'">
+      <div class="channel-icon">⚡</div>
+      <div>云闪付商家服务</div>
+    </div>
+  </div>
+</div>
+
                 <div class="error-message" id="channelError">请选择至少一个支付通道</div>
             </div>
             
@@ -1037,3 +1039,4 @@
 </body>
 
 </html>
+
